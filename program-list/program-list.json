@@ -1,5 +1,15 @@
 [
   {
+    "program_name": "(ISC)² TEST",
+    "policy_url": "https://bugcrowd.com/isc2",
+    "submission_url": "https://bugcrowd.com/isc2/report",
+    "launch_date": "",
+    "bug_bounty": false,
+    "swagf": false,
+    "hall_of_fame": true,
+    "safe_harbor": "partial"
+  },
+  {
     "program_name": "(ISC)²",
     "policy_url": "https://bugcrowd.com/isc2",
     "submission_url": "https://bugcrowd.com/isc2/report",
