@@ -20,7 +20,9 @@ function isValidLink(link) {
 	}
 	
 	protocol.get(url, (response) => {
+		console.log(response.statusCode);
 		response.resume();
+		console.log("2: " + response.statusCode);
 		return response.statusCode === 200;
 	}).on('error', (error) => {
 		return false;
