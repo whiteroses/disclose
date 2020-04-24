@@ -1,0 +1,5 @@
+name: 'Validate links'
+description: 'Check that all links respond with HTTP 200.'
+runs:
+        using: 'node12'
+        main: 'main.js'
