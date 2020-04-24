@@ -9,6 +9,7 @@ function isValidLink(link) {
 		var url = new URL(link);
 	} catch (error) {
 		// url is invalid
+		console.log("Invalid URL.");
 		return false;
 	}
 	if (url.protocol === 'https:') {
@@ -16,15 +17,16 @@ function isValidLink(link) {
 	} else if (url.protocol === 'http:') {
 		var protocol = http;
 	} else {
+		console.log("Invalid protocol.");
 		return false;
 	}
 	
 	protocol.get(url, (response) => {
-		console.log(response.statusCode);
+		console.log("Status code check.");
 		response.resume();
-		console.log("2: " + response.statusCode);
 		return response.statusCode === 200;
 	}).on('error', (error) => {
+		console.log(".get() error.");
 		return false;
 	});
 }
