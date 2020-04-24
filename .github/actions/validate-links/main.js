@@ -6,10 +6,11 @@ const https = require('https');
 
 function isValidLink(link) {
 	try {
+		console.log("link: " + link);
 		var url = new URL(link);
 	} catch (error) {
 		// url is invalid
-		console.log("Invalid URL.");
+		console.log("Invalid URL!");
 		return false;
 	}
 	if (url.protocol === 'https:') {
