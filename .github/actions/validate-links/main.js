@@ -10,7 +10,7 @@ function isValidLink(link) {
 		var url = new URL(link);
 	} catch (error) {
 		// url is invalid
-		console.log("Invalid URL!");
+		console.log("Invalid URL! " + link);
 		return false;
 	}
 	if (url.protocol === 'https:') {
@@ -33,7 +33,9 @@ function isValidLink(link) {
 }
 
 function programHasInvalidURL(program) {
-	return !isValidLink(program['policy_url']);
+	var result = !isValidLink(program['policy_url']);
+	console.log(result + program['policy_url']);
+	return result;
 }
 
 try {
