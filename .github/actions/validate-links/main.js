@@ -39,8 +39,8 @@ try {
 		let programsWithBrokenLinks = json.filter(programHasInvalidURL);
 		if (programsWithBrokenLinks) {
 			let errorMessage = "";
-			programsWithBrokenLinks.forEach(function(currentValue) {
-				errorMessage += 'Program ' + program['program_name'] + ' has invalid policy_url ' + policy_url + '.\n';
+			programsWithBrokenLinks.forEach(function(program) {
+				errorMessage += 'Program ' + program['program_name'] + ' has invalid policy_url ' + program["policy_url"] + '.\n';
 			});
 			throw new Error(errorMessage);
 		} else {
