@@ -1,11 +1,61 @@
 [
   {
+    "program_name": "Test HTTPS domain does not exist",
+    "policy_url": "https://does-not-exist.doesnotexist",
+    "submission_url": "https://bugcrowd.com/isc2/report",
+    "launch_date": "",
+    "bug_bounty": false,
+    "swag": false,
+    "hall_of_fame": true,
+    "safe_harbor": "partial"
+  },
+  {
+    "program_name": "Test2 HTTP domain does not exist",
+    "policy_url": "http://does-not-exist.doesnotexist",
+    "submission_url": "https://bugcrowd.com/isc2/report",
+    "launch_date": "",
+    "bug_bounty": false,
+    "swag": false,
+    "hall_of_fame": true,
+    "safe_harbor": "partial"
+  },
+  {
+    "program_name": "Test3 HTTPS 404",
+    "policy_url": "https://en.wikipedia.org/doesnotexist",
+    "submission_url": "https://bugcrowd.com/isc2/report",
+    "launch_date": "",
+    "bug_bounty": false,
+    "swag": false,
+    "hall_of_fame": true,
+    "safe_harbor": "partial"
+  },
+  {
+    "program_name": "Test4 HTTP 307",
+    "policy_url": "http://en.wikipedia.org/doesnotexist",
+    "submission_url": "https://bugcrowd.com/isc2/report",
+    "launch_date": "",
+    "bug_bounty": false,
+    "swag": false,
+    "hall_of_fame": true,
+    "safe_harbor": "partial"
+  },
+  {
+    "program_name": "Test5 Invalid scheme",
+    "policy_url": "file:///localhost",
+    "submission_url": "https://bugcrowd.com/isc2/report",
+    "launch_date": "",
+    "bug_bounty": false,
+    "swag": false,
+    "hall_of_fame": true,
+    "safe_harbor": "partial"
+  },
+  {
     "program_name": "(ISC)²",
     "policy_url": "https://bugcrowd.com/isc2",
     "submission_url": "https://bugcrowd.com/isc2/report",
     "launch_date": "",
     "bug_bounty": false,
-    "swagf": false,
+    "swag": false,
     "hall_of_fame": true,
     "safe_harbor": "partial"
   },
