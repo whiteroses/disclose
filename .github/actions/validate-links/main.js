@@ -26,8 +26,9 @@ async function checkProgramLink(program) {
 		return false;
 	}
 	
-	let responsePromise = new Promise((resolve) => {
-		protocol.get(url, (response) => {
+	return new Promise((resolve) => {
+		protocol.get(url, response => {
+			response.resume();
 			if (response.statusCode === 200) {
 				resolve(true);
 			} else {
@@ -37,7 +38,7 @@ async function checkProgramLink(program) {
 		}).on('error', (error) => {
 			console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: ${error.message}\n`);
 			resolve(false);
-		}).resume();
+		});
 	});
 }
 
