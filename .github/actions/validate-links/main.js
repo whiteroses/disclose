@@ -54,7 +54,7 @@ async function checkProgramLink(program) {
 	let programsList = JSON.parse(file);
 
 	let promises = [];
-	programsList.forEach((program) => {
+	programsList.forEach(async (program) => {
 		var promise = await checkProgramLink(program));
 		promises.push(promise);
 	});
