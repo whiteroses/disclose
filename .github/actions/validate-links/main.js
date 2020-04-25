@@ -55,7 +55,8 @@ async function checkProgramLink(program) {
 
 	let promises = [];
 	programsList.forEach((program) => {
-		promises.push(await checkProgramLink(program));
+		var promise = await checkProgramLink(program));
+		promises.push(promise);
 	});
 	Promise.allSettled(promises).then(results => {
 		results.forEach(result => {
