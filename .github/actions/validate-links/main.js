@@ -32,7 +32,7 @@ async function checkProgramLink(program) {
 			if (response.statusCode === 200) {
 				resolve(true);
 			} else {
-				console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: Responded with ${response.statusCode} ${response.statusMessage}.\n`);
+				console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: Responded with ${response.statusCode} ${response.statusMessage}.\n ${response.rawHeaders} ${response.httpVersion}`);
 				resolve(false);
 			};
 		}).on('error', (error) => {
