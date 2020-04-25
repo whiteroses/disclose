@@ -13,7 +13,7 @@ async function checkProgramLink(program) {
 		var url = new URL(program.policy_url);
 	} catch (error) {
 		// url is invalid
-		console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: Invalid URL.\n`);
+		console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: Invalid URL.`);
 		return false;
 	}
 
@@ -22,21 +22,21 @@ async function checkProgramLink(program) {
 	} else if (url.protocol === 'http:') {
 		var protocol = http;
 	} else {
-		console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: URL protocol not HTTPS or HTTP.\n`);
+		console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: URL protocol not HTTPS or HTTP.`);
 		return false;
 	}
 	
 	return new Promise((resolve) => {
-		protocol.get(url, response => {
+		protocol.request(url, {method: 'HEAD'}, response => {
 			response.resume();
 			if (response.statusCode === 200) {
 				resolve(true);
 			} else {
-				console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: Responded with ${response.statusCode} ${response.statusMessage}.\n ${response.rawHeaders} ${response.httpVersion}`);
+				console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: Responded with ${response.statusCode} ${response.statusMessage}.`);
 				resolve(false);
 			};
 		}).on('error', (error) => {
-			console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: ${error.message}\n`);
+			console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: ${error.message}`);
 			resolve(false);
 		});
 	});
