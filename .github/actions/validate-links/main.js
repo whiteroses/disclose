@@ -10,7 +10,7 @@ const https = require('https');
 
 async function checkProgramLink(program) {
 	try {
-		var url = new URL(link);
+		var url = new URL(program.policy_url);
 	} catch (error) {
 		// url is invalid
 		console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: Invalid URL.\n`);
