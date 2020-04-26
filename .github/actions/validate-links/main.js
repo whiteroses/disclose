@@ -55,10 +55,12 @@ const checkProgramLink = async (program) => {
 	let programsList = JSON.parse(file);
 
 	let results = [];
-	programsList.forEach((program) => {
-		let result = await checkProgramLink(program);
+	let i = 0;
+	while (i < programsList.length) {
+		let result = await checkProgramLink(programsList[i]);
 		results.push(result);
-	});
+		++i;
+	}
 
 	if (results.includes(false)) {
 		core.setFailed('Invalid program link(s) found.');
