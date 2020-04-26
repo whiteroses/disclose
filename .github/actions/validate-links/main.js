@@ -4,11 +4,14 @@ const http = require('http');
 const https = require('https');
 
 
+// TODO: Make a small number of connections at once? Pooling?
 // TODO: response timeout limit?
 // TODO: Try HEAD first, then if not available, GET?
+// TODO: We may not need to pre-validating for new URL and https/http -- just catch the relevant errors?
 
 
 const checkProgramLink = async (program) => {
+	console.log(`${program.program_name}: started ${new Date()}.`);
 	try {
 		var url = new URL(program.policy_url);
 	} catch (error) {
@@ -58,6 +61,7 @@ const checkProgramLink = async (program) => {
 	let i = 0;
 	while (i < programsList.length) {
 		let result = await checkProgramLink(programsList[i]);
+		console.log('Ended.');
 		results.push(result);
 		++i;
 	}
