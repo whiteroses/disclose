@@ -30,7 +30,7 @@ const checkProgramLink = async (program) => {
 	}
 	
 	return new Promise((resolve) => {
-		protocol.get(url, response => {
+		protocol.get(url, {'headers': {'Connection': 'close'}}, response => {
 			response.resume();
 			if (response.statusCode === 200) {
 				resolve(true);
@@ -42,6 +42,7 @@ const checkProgramLink = async (program) => {
 			console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: ${error.message}`);
 			resolve(false);
 		});
+		// TODO: If we use .request() instead of .get(), we need to do var request = protocol.get(...), then request.end().
 	});
 }
 
