@@ -24,13 +24,12 @@ const logEnded = function(programNumber) {
 
 async function checkProgramLink(program) {
 	logInitiated();
-	var programNumber = p;
 	try {
 		var url = new URL(program.policy_url);
 	} catch (error) {
 		// url is invalid
 		console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: Invalid URL.`);
-		logResolved(programNumber);
+		logResolved(p);
 		return false;
 	}
 
@@ -40,33 +39,32 @@ async function checkProgramLink(program) {
 		var protocol = http;
 	} else {
 		console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: URL protocol not HTTPS or HTTP.`);
-		logResolved(programNumber);
+		logResolved(p);
 		return false;
 	}
 	
 	return new Promise((resolve) => {
 		protocol.get(url, {'headers': {'Connection': 'close'}}, response => {
-			var program = pInitiated;
 			response.on('end', () => {
 				console.log('http.IncomingMessage.end event.');
 				response.destroy();
 				logEnded();
 			}).resume();
 			if (response.statusCode === 200) {
-				logResolved(programNumber);
+				logResolved(p);
 				resolve(true);
 			} else {
 				console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: Responded with ${response.statusCode} ${response.statusMessage}.`);
-				logResolved(programNumber);
+				logResolved(p);
 				resolve(false);
 			};
 		}).on('error', (error) => {
 			console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: ${error.message}`);
-			logResolved(programNumber);
+			logResolved(p);
 			resolve(false);
 		}).on('aborted', (error) => {
 			console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: ${error.message}`);
-			logResolved(programNumber);
+			logResolved(p);
 			resolve(false);
 		});
 	});
