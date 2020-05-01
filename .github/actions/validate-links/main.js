@@ -16,7 +16,7 @@ const logEnded = function(programId) {
 };
 
 
-async function checkProgramLink(programId) {
+async function checkProgramLink(program, programId) {
 	console.log(`Program ${programId} initiated.`);
 	try {
 		var url = new URL(program.policy_url);
