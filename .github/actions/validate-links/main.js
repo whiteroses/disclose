@@ -62,7 +62,9 @@ async function checkProgramLink(program, programId) {
 			resolve(false);
 		});
 		request.setTimeout(5000, function() {
-		    request.abort();
+			request.abort();
+			console.log(`Program ${programId} timed out.`);
+			resolve(false);
 		});
 	});
 }
@@ -89,6 +91,7 @@ async function checkProgramLink(program, programId) {
 	console.log('All promises pushed.');
 	Promise.allSettled(promises).then(results => {
 		results.forEach(result => {
+			console.log(`result.value = ${result.value}.`);
 			if (result.value === false) {
 				core.setFailed('Invalid program link(s) found.');
 				// TODO: Action should terminate here?
