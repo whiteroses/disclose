@@ -27,15 +27,21 @@ async function checkProgramLink(program) {
 	}
 	
 	return new Promise((resolve) => {
-		protocol.get(url, response => {
-			response.resume();
+		protocol.get(url, {'headers': {'Connection': 'close'}}, response => {
 			if (response.statusCode === 200) {
 				resolve(true);
 			} else {
 				console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: Responded with ${response.statusCode} ${response.statusMessage}.`);
 				resolve(false);
 			};
+			response.on('end', () => {
+				console.log('http.IncomingMessage.end event.');
+				response.destroy();
+			}).resume();
 		}).on('error', (error) => {
+			console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: ${error.message}`);
+			resolve(false);
+		}).on('aborted', (error) => {
 			console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: ${error.message}`);
 			resolve(false);
 		});
