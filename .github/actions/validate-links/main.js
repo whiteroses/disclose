@@ -70,7 +70,7 @@ async function checkProgramLink(program, programId) {
 }
 
 
-(async function main() {
+const something = (async function main() {
 	console.log('Validating program links...');
 
 	try {
