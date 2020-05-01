@@ -10,10 +10,6 @@ const https = require('https');
 
 var p = 0;
 
-const logInitiated = function() {
-	++p;
-	console.log(`Program ${p} initiated.`);
-};
 const logResolved = function(programNumber) {
 	console.log(`Program ${programNumber} returned/resolved.`);
 };
@@ -23,13 +19,15 @@ const logEnded = function(programNumber) {
 
 
 async function checkProgramLink(program) {
-	logInitiated();
+	++p;
+	var thisProgramNumber = p;
+	console.log(`Program ${p} initiated.`);
 	try {
 		var url = new URL(program.policy_url);
 	} catch (error) {
 		// url is invalid
 		console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: Invalid URL.`);
-		logResolved(p);
+		logResolved(thisProgramNumber);
 		return false;
 	}
 
@@ -39,33 +37,36 @@ async function checkProgramLink(program) {
 		var protocol = http;
 	} else {
 		console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: URL protocol not HTTPS or HTTP.`);
-		logResolved(p);
+		logResolved(thisProgramNumber);
 		return false;
 	}
 	
 	return new Promise((resolve) => {
-		protocol.get(url, {'headers': {'Connection': 'close'}}, response => {
+		var request = protocol.get(url, {'headers': {'Connection': 'close'}}, response => {
 			response.on('end', () => {
 				console.log('http.IncomingMessage.end event.');
 				response.destroy();
 				logEnded(p);
 			}).resume();
 			if (response.statusCode === 200) {
-				logResolved(p);
+				logResolved(thisProgramNumber);
 				resolve(true);
 			} else {
 				console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: Responded with ${response.statusCode} ${response.statusMessage}.`);
-				logResolved(p);
+				logResolved(thisProgramNumber);
 				resolve(false);
 			};
 		}).on('error', (error) => {
 			console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: ${error.message}`);
-			logResolved(p);
+			logResolved(thisProgramNumber);
 			resolve(false);
 		}).on('aborted', (error) => {
 			console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: ${error.message}`);
-			logResolved(p);
+			logResolved(thisProgramNumber);
 			resolve(false);
+		});
+		request.setTimeout(5000, function() {
+		    request.abort();
 		});
 	});
 }
