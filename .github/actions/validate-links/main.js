@@ -9,12 +9,12 @@ const https = require('https');
 
 
 async function checkProgramLink(program) {
-	let p = 0;
+	var p = 0;
 	const increment = function() {
 		++p;
 		console.log(`Program ${p} returned/resolved.`);
 	};
-	let ended = 0;
+	var ended = 0;
 	const incrementEnded = function() {
 		++ended;
 		console.log(`${ended} IncomingMessages ended.`);
