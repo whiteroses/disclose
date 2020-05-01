@@ -9,11 +9,23 @@ const https = require('https');
 
 
 async function checkProgramLink(program) {
+	let p = 0;
+	const increment = function() {
+		++p;
+		console.log(`Program ${n} returned/resolved.`);
+	};
+	let ended = 0;
+	const incrementEnded = function() {
+		++ended;
+		console.log(`${ended} IncomingMessages ended.`);
+	};
+
 	try {
 		var url = new URL(program.policy_url);
 	} catch (error) {
 		// url is invalid
 		console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: Invalid URL.`);
+		increment();
 		return false;
 	}
 
@@ -23,26 +35,32 @@ async function checkProgramLink(program) {
 		var protocol = http;
 	} else {
 		console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: URL protocol not HTTPS or HTTP.`);
+		increment();
 		return false;
 	}
 	
 	return new Promise((resolve) => {
 		protocol.get(url, {'headers': {'Connection': 'close'}}, response => {
 			if (response.statusCode === 200) {
+				increment();
 				resolve(true);
 			} else {
 				console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: Responded with ${response.statusCode} ${response.statusMessage}.`);
+				increment();
 				resolve(false);
 			};
 			response.on('end', () => {
 				console.log('http.IncomingMessage.end event.');
 				response.destroy();
+				incrementEnded();
 			}).resume();
 		}).on('error', (error) => {
 			console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: ${error.message}`);
+			increment();
 			resolve(false);
 		}).on('aborted', (error) => {
 			console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: ${error.message}`);
+			increment();
 			resolve(false);
 		});
 	});
