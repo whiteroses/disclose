@@ -9,24 +9,28 @@ const https = require('https');
 
 
 var p = 0;
-var ended = 0;
+
+const logInitiated = function() {
+	++p;
+	console.log(`Program ${p} initiated.`);
+};
+const logResolved = function(programNumber) {
+	console.log(`Program ${programNumber} returned/resolved.`);
+};
+const logEnded = function(programNumber) {
+	console.log(`Program ${programNumber} IncomingMessage ended.`);
+};
+
 
 async function checkProgramLink(program) {
-	const increment = function() {
-		++p;
-		console.log(`Program ${p} returned/resolved.`);
-	};
-	const incrementEnded = function() {
-		++ended;
-		console.log(`${ended} IncomingMessages ended.`);
-	};
-
+	logInitiated();
+	var programNumber = p;
 	try {
 		var url = new URL(program.policy_url);
 	} catch (error) {
 		// url is invalid
 		console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: Invalid URL.`);
-		increment();
+		logResolved(programNumber);
 		return false;
 	}
 
@@ -36,32 +40,33 @@ async function checkProgramLink(program) {
 		var protocol = http;
 	} else {
 		console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: URL protocol not HTTPS or HTTP.`);
-		increment();
+		logResolved(programNumber);
 		return false;
 	}
 	
 	return new Promise((resolve) => {
 		protocol.get(url, {'headers': {'Connection': 'close'}}, response => {
-			if (response.statusCode === 200) {
-				increment();
-				resolve(true);
-			} else {
-				console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: Responded with ${response.statusCode} ${response.statusMessage}.`);
-				increment();
-				resolve(false);
-			};
+			var program = pInitiated;
 			response.on('end', () => {
 				console.log('http.IncomingMessage.end event.');
 				response.destroy();
-				incrementEnded();
+				logEnded();
 			}).resume();
+			if (response.statusCode === 200) {
+				logResolved(programNumber);
+				resolve(true);
+			} else {
+				console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: Responded with ${response.statusCode} ${response.statusMessage}.`);
+				logResolved(programNumber);
+				resolve(false);
+			};
 		}).on('error', (error) => {
 			console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: ${error.message}`);
-			increment();
+			logResolved(programNumber);
 			resolve(false);
 		}).on('aborted', (error) => {
 			console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: ${error.message}`);
-			increment();
+			logResolved(programNumber);
 			resolve(false);
 		});
 	});
@@ -84,6 +89,7 @@ async function checkProgramLink(program) {
 		var promise = await checkProgramLink(program);
 		promises.push(promise);
 	});
+	console.log('All promises pushed.');
 	Promise.allSettled(promises).then(results => {
 		results.forEach(result => {
 			if (result.value === false) {
