@@ -12,7 +12,7 @@ async function checkProgramLink(program) {
 	let p = 0;
 	const increment = function() {
 		++p;
-		console.log(`Program ${n} returned/resolved.`);
+		console.log(`Program ${p} returned/resolved.`);
 	};
 	let ended = 0;
 	const incrementEnded = function() {
