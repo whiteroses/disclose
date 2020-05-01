@@ -90,6 +90,7 @@ const something = (async function main() {
 	});
 	console.log('All promises pushed.');
 	const finalPromise = await Promise.allSettled(promises).then(results => {
+		console.log(`results: ${results}.`);
 		results.forEach(result => {
 			console.log(`result.value = ${result.value}.`);
 			if (result.value === false) {
