@@ -8,26 +8,22 @@ const https = require('https');
 // TODO: Try HEAD first, then if not available, GET?
 
 
-var p = 0;
-
-const logResolved = function(programNumber) {
-	console.log(`Program ${programNumber} returned/resolved.`);
+const logResolved = function(programId) {
+	console.log(`Program ${programId} returned/resolved.`);
 };
-const logEnded = function(programNumber) {
-	console.log(`Program ${programNumber} IncomingMessage ended.`);
+const logEnded = function(programId) {
+	console.log(`Program ${programId} IncomingMessage ended.`);
 };
 
 
-async function checkProgramLink(program) {
-	++p;
-	var thisProgramNumber = p;
-	console.log(`Program ${p} initiated.`);
+async function checkProgramLink(programId) {
+	console.log(`Program ${programId} initiated.`);
 	try {
 		var url = new URL(program.policy_url);
 	} catch (error) {
 		// url is invalid
 		console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: Invalid URL.`);
-		logResolved(thisProgramNumber);
+		logResolved(programId);
 		return false;
 	}
 
@@ -37,7 +33,7 @@ async function checkProgramLink(program) {
 		var protocol = http;
 	} else {
 		console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: URL protocol not HTTPS or HTTP.`);
-		logResolved(thisProgramNumber);
+		logResolved(programId);
 		return false;
 	}
 	
@@ -49,20 +45,20 @@ async function checkProgramLink(program) {
 				logEnded(p);
 			}).resume();
 			if (response.statusCode === 200) {
-				logResolved(thisProgramNumber);
+				logResolved(programId);
 				resolve(true);
 			} else {
 				console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: Responded with ${response.statusCode} ${response.statusMessage}.`);
-				logResolved(thisProgramNumber);
+				logResolved(programId);
 				resolve(false);
 			};
 		}).on('error', (error) => {
 			console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: ${error.message}`);
-			logResolved(thisProgramNumber);
+			logResolved(programId);
 			resolve(false);
 		}).on('aborted', (error) => {
 			console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: ${error.message}`);
-			logResolved(thisProgramNumber);
+			logResolved(programId);
 			resolve(false);
 		});
 		request.setTimeout(5000, function() {
@@ -84,8 +80,10 @@ async function checkProgramLink(program) {
 	let programsList = JSON.parse(file);
 
 	let promises = [];
+	let programId = 0;
 	programsList.forEach(async (program) => {
-		var promise = await checkProgramLink(program);
+		++programId;
+		var promise = await checkProgramLink(program, programId);
 		promises.push(promise);
 	});
 	console.log('All promises pushed.');
