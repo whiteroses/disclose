@@ -42,7 +42,7 @@ async function checkProgramLink(program, programId) {
 			response.on('end', () => {
 				console.log('http.IncomingMessage.end event.');
 				response.destroy();
-				logEnded(p);
+				logEnded(programId);
 			}).resume();
 			if (response.statusCode === 200) {
 				logResolved(programId);
