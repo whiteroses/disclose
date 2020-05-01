@@ -89,7 +89,7 @@ async function checkProgramLink(program, programId) {
 		promises.push(promise);
 	});
 	console.log('All promises pushed.');
-	await Promise.allSettled(promises).then(results => {
+	const finalPromise = await Promise.allSettled(promises).then(results => {
 		results.forEach(result => {
 			console.log(`result.value = ${result.value}.`);
 			if (result.value === false) {
@@ -98,4 +98,5 @@ async function checkProgramLink(program, programId) {
 			}
 		});
 	});
+	return finalPromise;
 })();
