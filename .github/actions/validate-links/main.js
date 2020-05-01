@@ -8,13 +8,14 @@ const https = require('https');
 // TODO: Try HEAD first, then if not available, GET?
 
 
+var p = 0;
+var ended = 0;
+
 async function checkProgramLink(program) {
-	var p = 0;
 	const increment = function() {
 		++p;
 		console.log(`Program ${p} returned/resolved.`);
 	};
-	var ended = 0;
 	const incrementEnded = function() {
 		++ended;
 		console.log(`${ended} IncomingMessages ended.`);
