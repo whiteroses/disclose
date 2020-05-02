@@ -101,7 +101,7 @@ async function checkProgramLink(program, programId) {
 	}).then(() => {done = true;});
 	var timeout = setInterval(() => {
 		if (done) {
-			timeout.clearInterval();
+			clearInterval(timeout);
 			console.log('All program links appear valid.');
 		}
 	}, 1000);
