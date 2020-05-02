@@ -8,4 +8,4 @@ jobs:
                 - name: Check out repository
                   uses: actions/checkout@v2
                 - name: Validate links action step
-                  uses: ./.github/actions/validate-links
+                  uses: .github/actions/validate-links

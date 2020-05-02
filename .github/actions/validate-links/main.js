@@ -76,7 +76,7 @@ var done = false;
 	console.log('Validating program links...');
 
 	try {
-		var file = await fs.readFile('./program-list/program-list.json', "UTF-8");
+		var file = await fs.readFile('program-list/program-list.json', "UTF-8");
 	} catch (error) {
 		core.setFailed(error.message);
 	}
