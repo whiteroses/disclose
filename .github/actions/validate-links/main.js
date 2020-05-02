@@ -82,6 +82,7 @@ var done = false;
 	}
 
 	let programsList = JSON.parse(file);
+	console.log(`programsList.length: ${programsList.length}`);
 
 	let promises = [];
 	let programId = 0;
