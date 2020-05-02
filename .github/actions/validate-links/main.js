@@ -87,10 +87,11 @@ var done = false;
 	let programId = 0;
 	programsList.forEach(async (program) => {
 		++programId;
-		var promise = await checkProgramLink(program, programId);
+		var promise = checkProgramLink(program, programId);
 		promises.push(promise);
 	});
 	console.log(`promises length: ${promises.length}.`);
+	// TODO: promises is empty, as push does not happen before allSettled is called.
 	console.log(`All promises pushed: ${promises}.`);
 	await Promise.allSettled(promises).then(results => {
 		console.log(`results: ${results}.`);
