@@ -70,7 +70,7 @@ async function checkProgramLink(program, programId) {
 }
 
 
-const something = (async function main() {
+(async function main() {
 	console.log('Validating program links...');
 
 	try {
@@ -89,15 +89,20 @@ const something = (async function main() {
 		promises.push(promise);
 	});
 	console.log('All promises pushed.');
-	const finalPromise = await Promise.allSettled(promises).then(results => {
+	var done = false;
+	await Promise.allSettled(promises).then(results => {
 		console.log(`results: ${results}.`);
 		results.forEach(result => {
 			console.log(`result.value = ${result.value}.`);
 			if (result.value === false) {
 				core.setFailed('Invalid program link(s) found.');
-				// TODO: Action should terminate here?
 			}
 		});
-	});
-	return finalPromise;
+	}).then(() => {done = true;});
+	var timeout = setInterval(() => {
+		if (done) {
+			timeout.clearInterval();
+			console.log('All program links appear valid.');
+		}
+	}, 1000);
 })();
