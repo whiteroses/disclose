@@ -70,6 +70,8 @@ async function checkProgramLink(program, programId) {
 }
 
 
+var done = false;
+
 (async function main() {
 	console.log('Validating program links...');
 
@@ -89,7 +91,6 @@ async function checkProgramLink(program, programId) {
 		promises.push(promise);
 	});
 	console.log('All promises pushed.');
-	var done = false;
 	await Promise.allSettled(promises).then(results => {
 		console.log(`results: ${results}.`);
 		results.forEach(result => {
@@ -99,10 +100,11 @@ async function checkProgramLink(program, programId) {
 			}
 		});
 	}).then(() => {done = true;});
-	var timeout = setInterval(() => {
-		if (done) {
-			clearInterval(timeout);
-			console.log('All program links appear valid.');
-		}
-	}, 1000);
 })();
+
+var timeout = setInterval(() => {
+	if (done) {
+		clearInterval(timeout);
+		console.log('All program links appear valid.');
+	}
+}, 1000);
