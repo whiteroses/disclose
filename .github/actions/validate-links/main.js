@@ -90,6 +90,7 @@ var done = false;
 		var promise = await checkProgramLink(program, programId);
 		promises.push(promise);
 	});
+	console.log(`promises length: ${promises.length}.`);
 	console.log(`All promises pushed: ${promises}.`);
 	await Promise.allSettled(promises).then(results => {
 		console.log(`results: ${results}.`);
