@@ -54,8 +54,7 @@ const checkPolicyURL = async (program) => (
 			'sec-fetch-dest': 'document',
 			'sec-fetch-mode': 'navigate',
 			'sec-fetch-site': 'none',
-			'sec-fetch-user': '?1',
-			'upgrade-insecure-requests': '1'
+			'sec-fetch-user': '?1'
 		}}, async response => {
 			/*
 			response.on('end', () => {
