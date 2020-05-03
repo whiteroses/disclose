@@ -69,7 +69,7 @@ var done = false;
 		core.setFailed(error);
 	}
 
-	console.log(`Checking policy URL for ${programsList.length} programs...`);
+	console.log(`Checking policy URLs for ${programsList.length} programs...`);
 
 	var checks = programsList.map(checkPolicyURL);
 
@@ -77,7 +77,7 @@ var done = false;
 		let invalidURLsCount = 0;
 		for (const [programId, result] of results.entries()) {
 			if (result.status === 'rejected') {
-				++invalidURLFound;
+				++invalidURLsCount;
 				let program = programsList[programId];
 				console.log(`"${programId + 1}. ${program.program_name}" (policy_url ${program.policy_url}): ${result.reason}.`);
 			}
