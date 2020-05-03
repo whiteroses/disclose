@@ -19,12 +19,12 @@ const logEnded = function(programId) {
 */
 const REQUEST_TIMEOUT = 5000;
 
-function streamToString(stream) {
+function streamToString(stream, encoding) {
   const chunks = [];
   return new Promise((resolve, reject) => {
     stream.on('data', chunk => chunks.push(chunk));
     stream.on('error', reject);
-    stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+    stream.on('end', () => resolve(Buffer.concat(chunks).toString(encoding)));
   });
 }
 
@@ -62,7 +62,13 @@ const checkPolicyURL = async (program) => (
 				response.destroy();
 			}).resume();
 			*/
-			var fullResponse = await streamToString(response);
+			var contentType = response.headers['content-type'];
+			try {
+				var encoding = (contentType? contentType.split('=')[1].trim(): 'utf8');
+			} catch (exception) {
+				var encoding = 'utf8';
+			}
+			var fullResponse = await streamToString(response, encoding);
 			if (response.statusCode === 200) {
 				resolve(true);
 			} else {
