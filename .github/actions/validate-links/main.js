@@ -70,14 +70,17 @@ const checkPolicyURL = async (program) => (
 				var encoding = 'utf8';
 			}
 			var responseBody = await streamToString(response, encoding);
-			if (response.statusCode === 200) {
+			var statusCode = response.statusCode;
+			if (statusCode === 200) {
 				resolve(true);
 			} else {
 				let message = '';
-				if ([301, 302, 303, 307, 308].includes(response.statusCode)) {
+				if (statusCode === 404) {
+					message = '';
+				} else if ([301, 302, 303, 307, 308].includes(statusCode)) {
 					message = `(Location: ${response.headers['location']})`;
 				} else {
-					message = `\n(Headers: ${response.headers}\nResponse body: ${responseBody})`;
+					message = `\n(Headers: ${response.headers}\nBody: ${responseBody})`;
 				}
 				reject(`Responded with ${response.statusCode} ${response.statusMessage}. ${message}`);
 			};
