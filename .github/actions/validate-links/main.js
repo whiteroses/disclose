@@ -51,7 +51,7 @@ const checkPolicyURL = async (program) => (
 				response.destroy();
 			}).resume();
 			*/
-			var fullResponse = streamToString(response);
+			var fullResponse = await streamToString(response);
 			if (response.statusCode === 200) {
 				resolve(true);
 			} else {
