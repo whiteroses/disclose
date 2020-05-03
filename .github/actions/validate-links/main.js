@@ -4,6 +4,7 @@ const http = require('http');
 const https = require('https');
 
 
+// TODO: DigitalOcean redirecting to same URL?
 // TODO: Manually check results?
 // TODO: Follow redirects and print redirect URL?
 // TODO: Try HEAD first, then if not available, GET?
@@ -80,7 +81,7 @@ const checkPolicyURL = async (program) => (
 				} else if ([301, 302, 303, 307, 308].includes(statusCode)) {
 					message = `(Location: ${response.headers['location']})`;
 				} else {
-					message = `\n(Headers: ${response.headers}\nBody: ${responseBody})`;
+					message = `\n(Headers: ${JSON.stringify(response.headers)}\nBody: ${responseBody})`;
 				}
 				reject(`Responded with ${response.statusCode} ${response.statusMessage}. ${message}`);
 			};
