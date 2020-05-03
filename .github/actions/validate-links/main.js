@@ -4,6 +4,8 @@ const http = require('http');
 const https = require('https');
 
 
+// TODO: Manually check results?
+// TODO: Follow redirects and print redirect URL?
 // TODO: Try HEAD first, then if not available, GET?
 
 // TODO: Remove?
@@ -16,6 +18,15 @@ const logEnded = function(programId) {
 };
 */
 const REQUEST_TIMEOUT = 5000;
+
+function streamToString(stream) {
+  const chunks = [];
+  return new Promise((resolve, reject) => {
+    stream.on('data', chunk => chunks.push(chunk));
+    stream.on('error', reject);
+    stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+  });
+}
 
 const checkPolicyURL = async (program) => (
 	new Promise((resolve, reject) => {
@@ -34,14 +45,17 @@ const checkPolicyURL = async (program) => (
 		}
 	
 		var request = protocol.get(url, {'headers': {'Connection': 'close'}}, response => {
+			/*
 			response.on('end', () => {
 				// TODO: Is this necessary?
 				response.destroy();
 			}).resume();
+			*/
+			var fullResponse = streamToString(response);
 			if (response.statusCode === 200) {
 				resolve(true);
 			} else {
-				reject(`Responded with ${response.statusCode} ${response.statusMessage}.`);
+				reject(`Responded with ${response.statusCode} ${response.statusMessage}.\n${fullResponse}`);
 			};
 		}).on('aborted', (error) => {
 			reject(error.toString());
