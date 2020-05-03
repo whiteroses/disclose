@@ -51,7 +51,6 @@ const checkPolicyURL = async (program) => (
 			'accept-encoding': 'gzip, deflate, br',
 			'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
 			'cache-control': 'max-age=0',
-			'dnt': '1',
 			'sec-fetch-dest': 'document',
 			'sec-fetch-mode': 'navigate',
 			'sec-fetch-site': 'none',
