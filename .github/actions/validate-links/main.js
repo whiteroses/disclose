@@ -71,7 +71,7 @@ async function checkProgramLink(program, programId) {
 
 var done = false;
 
-(function() {
+(async function() {
 	var file = await fsPromises.readFile('program-list/program-list.json', 'utf8').catch((error) => {
 		core.setFailed(error);
 	});
