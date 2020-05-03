@@ -73,10 +73,11 @@ const checkPolicyURL = async (program) => (
 			if (response.statusCode === 200) {
 				resolve(true);
 			} else {
+				let message = '';
 				if ([301, 302, 303, 307, 308].includes(response.statusCode)) {
-					let message = `(Location: ${response.headers['location']})`;
+					message = `(Location: ${response.headers['location']})`;
 				} else {
-					let message = `\n(Headers: ${response.headers}\nResponse body: ${responseBody})`;
+					message = `\n(Headers: ${response.headers}\nResponse body: ${responseBody})`;
 				}
 				reject(`Responded with ${response.statusCode} ${response.statusMessage}. ${message}`);
 			};
