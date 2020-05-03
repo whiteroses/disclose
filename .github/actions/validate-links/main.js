@@ -6,7 +6,6 @@ const https = require('https');
 
 // TODO: DigitalOcean redirecting to same URL?
 // TODO: Manually check results?
-// TODO: Follow redirects and print redirect URL?
 // TODO: Try HEAD first, then if not available, GET?
 
 // TODO: Remove?
@@ -98,41 +97,43 @@ const checkPolicyURL = async (program) => (
 );
 
 
-var done = false;
+(() => {
+	var done = false;
 
-(async function() {
-	var file = await fsPromises.readFile('program-list/program-list.json', 'utf8').catch((error) => {
-		core.setFailed(error);
-	});
+	(async function() {
+		var file = await fsPromises.readFile('program-list/program-list.json', 'utf8').catch((error) => {
+			core.setFailed(error);
+		});
 
-	try {
-		var programsList = JSON.parse(file);
-	} catch(error) {
-		core.setFailed(error);
-	}
+		try {
+			var programsList = JSON.parse(file);
+		} catch(error) {
+			core.setFailed(error);
+		}
 
-	console.log(`Checking policy URLs for ${programsList.length} programs...`);
+		console.log(`Checking policy URLs for ${programsList.length} programs...`);
 
-	Promise.allSettled(programsList.map(checkPolicyURL)).then(results => {
-		let invalidURLsCount = 0;
-		for (const [programId, result] of results.entries()) {
-			if (result.status === 'rejected') {
-				++invalidURLsCount;
-				let program = programsList[programId];
-				console.log(`${programId + 1}. ${program.program_name} (${program.policy_url}): ${result.reason}`);
+		Promise.allSettled(programsList.map(checkPolicyURL)).then(results => {
+			let invalidURLsCount = 0;
+			for (const [programId, result] of results.entries()) {
+				if (result.status === 'rejected') {
+					++invalidURLsCount;
+					let program = programsList[programId];
+					console.log(`${programId + 1}. ${program.program_name} (${program.policy_url}): ${result.reason}`);
+				}
 			}
-		}
-		if (invalidURLsCount) {
-			core.setFailed(`${invalidURLsCount} invalid policy URL${invalidURLsCount === 1? '': 's'} found.`);
-		} else {
-			console.log('All policy URLs appear to be valid.');
-		}
-		done = true;
-	});
-})();
+			if (invalidURLsCount) {
+				core.setFailed(`${invalidURLsCount} policy URL${invalidURLsCount === 1? '': 's'} require attention.`);
+			} else {
+				console.log('All policy URLs appear to be valid.');
+			}
+			done = true;
+		});
+	})();
 
-var timeout = setInterval(() => {
-	if (done) {
-		clearInterval(timeout);
-	}
-}, 1000);
+	var timeout = setInterval(() => {
+		if (done) {
+			clearInterval(timeout);
+		}
+	}, 1000);
+})();
