@@ -46,7 +46,17 @@ const checkPolicyURL = async (program) => (
 	
 		var request = protocol.get(url, {'headers': {
 			'Connection': 'close',
-			'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Mobile Safari/537.36'
+			'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Mobile Safari/537.36',
+			'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+			'accept-encoding': 'gzip, deflate, br',
+			'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+			'cache-control': 'max-age=0',
+			'dnt': '1',
+			'sec-fetch-dest': 'document',
+			'sec-fetch-mode': 'navigate',
+			'sec-fetch-site': 'none',
+			'sec-fetch-user': '?1',
+			'upgrade-insecure-requests': '1'
 		}}, async response => {
 			/*
 			response.on('end', () => {
