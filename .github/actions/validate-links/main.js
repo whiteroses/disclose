@@ -43,7 +43,7 @@ async function checkPolicyURL(program, programId) {
 			} else {
 				resolve([programId, `Responded with ${response.statusCode} ${response.statusMessage}.`]);
 			};
-		}).on(['error', 'aborted'], (error) => {
+		}).on('aborted error', (error) => {
 			resolve([programId, error.toString()]);
 		});
 		request.setTimeout(REQUEST_TIMEOUT, function() {
