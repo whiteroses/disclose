@@ -50,7 +50,7 @@ const checkPolicyURL = async (program) => (
 		});
 		request.setTimeout(REQUEST_TIMEOUT, function() {
 			request.abort();
-			reject(`Request ${programId} timed out.`);
+			reject(`Request timed out.`);
 		});
 	})
 );
