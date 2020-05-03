@@ -55,7 +55,7 @@ const checkPolicyURL = async (program) => (
 			if (response.statusCode === 200) {
 				resolve(true);
 			} else {
-				reject(`Responded with ${response.statusCode} ${response.statusMessage}.\n${fullResponse}`);
+				reject(`Responded with ${response.statusCode} ${response.statusMessage}.\nHeaders: ${response.rawHeaders}\nFull response: ${fullResponse}`);
 			};
 		}).on('aborted', (error) => {
 			reject(error.toString());
