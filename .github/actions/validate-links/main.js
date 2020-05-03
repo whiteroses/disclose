@@ -1,10 +1,9 @@
 const core = require('@actions/core');
-const fs = require('fs').promises;
+const fsPromises = require('fs').promises;
 const http = require('http');
 const https = require('https');
 
 
-// TODO: Limit for acceptable delay in response?
 // TODO: Try HEAD first, then if not available, GET?
 
 
@@ -17,11 +16,11 @@ const logEnded = function(programId) {
 
 
 async function checkProgramLink(program, programId) {
+	// TODO: No sense repeating the program and policy_url in all these messages.
 	console.log(`Program ${programId} initiated.`);
 	try {
 		var url = new URL(program.policy_url);
 	} catch (error) {
-		// url is invalid
 		console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: Invalid URL.`);
 		logResolved(programId);
 		return false;
@@ -72,34 +71,25 @@ async function checkProgramLink(program, programId) {
 
 var done = false;
 
-(async function main() {
-	console.log('Validating program links...');
+(function() {
+	var file = await fsPromises.readFile('program-list/program-list.json', 'utf8').catch((error) => {
+		core.setFailed(error);
+	});
 
 	try {
-		var file = await fs.readFile('program-list/program-list.json', "UTF-8");
-	} catch (error) {
-		core.setFailed(error.message);
+		var programsList = JSON.parse(file);
+	} catch(error) {
+		core.setFailed(error);
 	}
 
-	let programsList = JSON.parse(file);
-	console.log(`programsList.length: ${programsList.length}`);
+	console.log(`Checking policy URL for ${programsList.length} programs...`);
 
-	let promises = [];
-	let programId = 0;
-	programsList.forEach(async (program) => {
-		++programId;
-		var promise = checkProgramLink(program, programId);
-		promises.push(promise);
-	});
-	console.log(`promises length: ${promises.length}.`);
-	// TODO: promises is empty, as push does not happen before allSettled is called.
-	console.log(`All promises pushed: ${promises}.`);
-	await Promise.allSettled(promises).then(results => {
-		console.log(`results: ${results}.`);
+	var checks = programsList.map(checkProgramLink);
+
+	Promise.allSettled(checks).then(results => {
 		results.forEach(result => {
-			console.log(`result.value = ${result.value}.`);
 			if (result.value === false) {
-				core.setFailed('Invalid program link(s) found.');
+				core.setFailed('Invalid policy URL(s) found.');
 			}
 		});
 	}).then(() => {done = true;});
@@ -108,6 +98,6 @@ var done = false;
 var timeout = setInterval(() => {
 	if (done) {
 		clearInterval(timeout);
-		console.log('All program links appear valid.');
+		console.log('All policy URLs appear to be valid.');
 	}
 }, 1000);
