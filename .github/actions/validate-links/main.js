@@ -6,24 +6,22 @@ const https = require('https');
 
 // TODO: Try HEAD first, then if not available, GET?
 
-
+// TODO: Remove?
+/*
 const logResolved = function(programId) {
 	console.log(`Program ${programId} returned/resolved.`);
 };
 const logEnded = function(programId) {
 	console.log(`Program ${programId} IncomingMessage ended.`);
 };
+*/
+const REQUEST_TIMEOUT = 5000;
 
-
-async function checkProgramLink(program, programId) {
-	// TODO: No sense repeating the program and policy_url in all these messages.
-	console.log(`Program ${programId} initiated.`);
+async function checkPolicyURL(program, programId) {
 	try {
 		var url = new URL(program.policy_url);
 	} catch (error) {
-		console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: Invalid URL.`);
-		logResolved(programId);
-		return false;
+		return [programId, 'Not a URL.'];
 	}
 
 	if (url.protocol === 'https:') {
@@ -31,39 +29,26 @@ async function checkProgramLink(program, programId) {
 	} else if (url.protocol === 'http:') {
 		var protocol = http;
 	} else {
-		console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: URL protocol not HTTPS or HTTP.`);
-		logResolved(programId);
-		return false;
+		return [programId, 'URL protocol not HTTPS or HTTP.'];
 	}
 	
 	return new Promise((resolve) => {
 		var request = protocol.get(url, {'headers': {'Connection': 'close'}}, response => {
 			response.on('end', () => {
-				console.log('http.IncomingMessage.end event.');
+				// TODO: Is this necessary?
 				response.destroy();
-				logEnded(programId);
 			}).resume();
 			if (response.statusCode === 200) {
-				logResolved(programId);
 				resolve(true);
 			} else {
-				console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: Responded with ${response.statusCode} ${response.statusMessage}.`);
-				logResolved(programId);
-				resolve(false);
+				resolve([programId, `Responded with ${response.statusCode} ${response.statusMessage}.`]);
 			};
-		}).on('error', (error) => {
-			console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: ${error.message}`);
-			logResolved(programId);
-			resolve(false);
-		}).on('aborted', (error) => {
-			console.log(`Program "${program.program_name}", policy_url ${program.policy_url}: ${error.message}`);
-			logResolved(programId);
-			resolve(false);
+		}).on(['error', 'aborted'], (error) => {
+			resolve([programId, error.toString()]);
 		});
-		request.setTimeout(5000, function() {
+		request.setTimeout(REQUEST_TIMEOUT, function() {
 			request.abort();
-			console.log(`Program ${programId} timed out.`);
-			resolve(false);
+			resolve([programId, `Request ${programId} timed out.`]);
 		});
 	});
 }
@@ -84,20 +69,26 @@ var done = false;
 
 	console.log(`Checking policy URL for ${programsList.length} programs...`);
 
-	var checks = programsList.map(checkProgramLink);
+	var checks = programsList.map(checkPolicyURL);
 
 	Promise.allSettled(checks).then(results => {
-		results.forEach(result => {
-			if (result.value === false) {
-				core.setFailed('Invalid policy URL(s) found.');
+		var invalidPrograms = results.filter(result => (result !== true));
+		if (invalidPrograms.length) {
+			for (const invalidProgram of invalidPrograms) {
+				let [programId, message] = invalidProgram;
+				let program = programsList[programId];
+				console.log(`Program "${programId + 1}. ${program.program_name}" (policy_url ${program.policy_url}): ${message}.`);
 			}
-		});
-	}).then(() => {done = true;});
+			core.setFailed('Invalid policy URL(s) found.');
+		} else {
+			console.log('All policy URLs appear to be valid.');
+		}
+		done = true;
+	});
 })();
 
 var timeout = setInterval(() => {
 	if (done) {
 		clearInterval(timeout);
-		console.log('All policy URLs appear to be valid.');
 	}
 }, 1000);
