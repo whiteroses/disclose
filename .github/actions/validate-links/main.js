@@ -64,7 +64,7 @@ const checkPolicyURL = async (program) => (
 			*/
 			var contentType = response.headers['content-type'];
 			try {
-				var encoding = (contentType? contentType.split('=')[1].trim(): 'utf8');
+				var encoding = (contentType.split('=')[1].trim().toLowerCase() === 'iso-8859-1'? 'latin1': 'utf8');
 			} catch (exception) {
 				var encoding = 'utf8';
 			}
