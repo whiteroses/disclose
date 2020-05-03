@@ -44,7 +44,10 @@ const checkPolicyURL = async (program) => (
 			reject('URL protocol not HTTPS or HTTP.');
 		}
 	
-		var request = protocol.get(url, {'headers': {'Connection': 'close'}}, async response => {
+		var request = protocol.get(url, {'headers': {
+			'Connection': 'close',
+			'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Mobile Safari/537.36'
+		}}, async response => {
 			/*
 			response.on('end', () => {
 				// TODO: Is this necessary?
