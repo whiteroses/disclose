@@ -69,11 +69,16 @@ const checkPolicyURL = async (program) => (
 			} catch (exception) {
 				var encoding = 'utf8';
 			}
-			var fullResponse = await streamToString(response, encoding);
+			var responseBody = await streamToString(response, encoding);
 			if (response.statusCode === 200) {
 				resolve(true);
 			} else {
-				reject(`Responded with ${response.statusCode} ${response.statusMessage}.\nHeaders: ${response.rawHeaders}\nFull response: ${fullResponse}`);
+				if ([301, 302, 303, 307, 308].includes(response.statusCode)) {
+					let message = `(Location: ${response.headers['location']})`;
+				} else {
+					let message = `\n(Headers: ${response.headers}\nResponse body: ${responseBody})`;
+				}
+				reject(`Responded with ${response.statusCode} ${response.statusMessage}. ${message}`);
 			};
 		}).on('aborted', (error) => {
 			reject(error.toString());
