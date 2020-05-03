@@ -71,15 +71,13 @@ var done = false;
 
 	console.log(`Checking policy URLs for ${programsList.length} programs...`);
 
-	var checks = programsList.map(checkPolicyURL);
-
-	Promise.allSettled(checks).then(results => {
+	Promise.allSettled(programsList.map(checkPolicyURL)).then(results => {
 		let invalidURLsCount = 0;
 		for (const [programId, result] of results.entries()) {
 			if (result.status === 'rejected') {
 				++invalidURLsCount;
 				let program = programsList[programId];
-				console.log(`"${programId + 1}. ${program.program_name}" (policy_url ${program.policy_url}): ${result.reason}.`);
+				console.log(`${programId + 1}. ${program.program_name} (${program.policy_url}): ${result.reason}`);
 			}
 		}
 		if (invalidURLsCount) {
