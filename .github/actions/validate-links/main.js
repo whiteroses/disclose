@@ -56,7 +56,6 @@ const checkPolicyURL = async (program) => (
 			'sec-fetch-user': '?1',
 			'upgrade-insecure-requests': '1',
 			'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36'
-			//'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36'
 		}}, async response => {
 			/*
 			response.on('end', () => {
@@ -112,7 +111,7 @@ const checkPolicyURL = async (program) => (
 			core.setFailed(error);
 		}
 
-		console.log(`Checking policy URLs for ${programsList.length} programs...`);
+		console.log(`Checking policy URLs for ${programsList.length} programs...\n`);
 
 		Promise.allSettled(programsList.map(checkPolicyURL)).then(results => {
 			let invalidURLsCount = 0;
@@ -120,7 +119,7 @@ const checkPolicyURL = async (program) => (
 				if (result.status === 'rejected') {
 					++invalidURLsCount;
 					let program = programsList[programId];
-					console.log(`${programId + 1}. ${program.program_name} (${program.policy_url}): ${result.reason}`);
+					console.log(`${programId + 1}. ${program.program_name} (${program.policy_url}): ${result.reason}\n`);
 				}
 			}
 			if (invalidURLsCount) {
