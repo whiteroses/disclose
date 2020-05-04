@@ -51,7 +51,7 @@ const checkPolicyURL = async (program) => (
     }
 
     const request = protocol.get(url, {'headers': {
-      'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,;' +
+      'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,' +
         'image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;' +
         'q=0.9',
       'accept-encoding': 'gzip, deflate, br',
@@ -149,7 +149,8 @@ const checkPolicyURL = async (program) => (
       if (invalidURLsCount) {
         core.setFailed(
           `\n${invalidURLsCount} policy URL` +
-          `${invalidURLsCount === 1? '': 's'} require attention.`);
+          `${invalidURLsCount === 1? '': 's'} require attention.`
+        );
       } else {
         console.log('\nAll policy URLs appear to be valid.');
       }
