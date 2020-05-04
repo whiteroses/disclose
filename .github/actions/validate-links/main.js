@@ -45,17 +45,17 @@ const checkPolicyURL = async (program) => (
 		}
 	
 		var request = protocol.get(url, {'headers': {
-			//'Connection': 'close',  // TODO: Not sure if this makes any difference?
-			'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Mobile Safari/537.36',
 			'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
 			'accept-encoding': 'gzip, deflate, br',
-			//'accept-encoding': 'identity',
-			'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+			'accept-language': 'en-US,en-GB;q=0.9,en;q=0.8',
+			'connection': 'close',
 			'cache-control': 'max-age=0',
 			'sec-fetch-dest': 'document',
 			'sec-fetch-mode': 'navigate',
 			'sec-fetch-site': 'none',
-			'sec-fetch-user': '?1'
+			'sec-fetch-user': '?1',
+			'upgrade-insecure-requests': '1',
+			'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36'
 		}}, async response => {
 			/*
 			response.on('end', () => {
