@@ -37,26 +37,25 @@ const decompressResponseBody = async (incomingMessage, encoding) => {
   ) {
     case 'br':
       await stream.pipeline(
-        incomingMessageBody, zlib.createBrotliDecompress(),
-        decompressedBodyDuplex, onDecompressError
+        incomingMessage, zlib.createBrotliDecompress(), decompressedBodyDuplex,
+        onDecompressError
       );
       break;
     case 'gzip':
       await stream.pipeline(
-        incomingMessageBody, zlib.createGunzip(),
-        decompressedBodyDuplex, onDecompressError
+        incomingMessage, zlib.createGunzip(), decompressedBodyDuplex,
+        onDecompressError
       );
       break;
     case 'deflate':
       await stream.pipeline(
-        incomingMessageBody, zlib.createInflate(),
-        decompressedBodyDuplex, onDecompressError
+        incomingMessage, zlib.createInflate(), decompressedBodyDuplex,
+        onDecompressError
       );
       break;
     default:
       await stream.pipeline(
-        incomingMessageBody, decompressedBodyDuplex,
-        onDecompressError
+        incomingMessage, decompressedBodyDuplex, onDecompressError
       );
   }
 
