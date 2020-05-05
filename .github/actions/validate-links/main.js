@@ -31,8 +31,9 @@ const decompressResponseBody = async (incomingMessage, encoding) => {
   };
   const decompressedBodyDuplex = new stream.Duplex();
 
+  const contentEncodingHeader = incomingMessage.headers['content-encoding'];
   switch (
-    incomingMessage.headers['content-encoding'].toLowerCase() || 'identity'
+    contentEncodingHeader? contentEncodingHeader.toLowerCase(): 'identity'
   ) {
     case 'br':
       await stream.pipeline(
