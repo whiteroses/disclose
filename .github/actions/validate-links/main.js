@@ -21,16 +21,16 @@ const logEnded = function(programId) {
   console.log(`Program ${programId} IncomingMessage ended.`);
 };
 */
-const REQUEST_TIMEOUT = 5000;
+const IDLE_SOCKET_TIMEOUT = 5000;
 
-function streamToString(stream, encoding) {
+const streamToString = (stream, encoding) => {
   const chunks = [];
   return new Promise((resolve, reject) => {
     stream.on('data', (chunk) => chunks.push(chunk));
     stream.on('error', reject);
     stream.on('end', () => resolve(Buffer.concat(chunks).toString(encoding)));
   });
-}
+};
 
 const checkPolicyURL = async (program) => (
   new Promise((resolve, reject) => {
@@ -65,24 +65,14 @@ const checkPolicyURL = async (program) => (
       'upgrade-insecure-requests': '1',
       'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 ' +
         '(KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36',
-    }}, async (response) => {
-      /*
-      response.on('end', () => {
-        // TODO: Is this necessary?
-        response.destroy();
-      }).resume();
-      */
-      const contentType = response.headers['content-type'];
-      let encoding;
-      try {
-        encoding = (
-          contentType.split('=')[1].trim().toLowerCase() === 'iso-8859-1'?
-          'latin1': 'utf8');
-      } catch (exception) {
-        encoding = 'utf8';
-      }
-      const responseBody = await streamToString(response, encoding);
-      const statusCode = response.statusCode;
+    }}, async (incomingMessage) => {
+      incomingMessage.on('aborted', (error) => {
+        // "...if the response closes prematurely, the response object does not
+        // emit an 'error' event but instead emits the 'aborted' event."
+        resolve(error.toString());
+      });
+
+      const statusCode = incomingMessage.statusCode;
       if (statusCode === 200) {
         resolve(true);
       } else {
@@ -90,22 +80,36 @@ const checkPolicyURL = async (program) => (
         if (statusCode === 404) {
           message = '';
         } else if ([301, 302, 303, 307, 308].includes(statusCode)) {
-          message = `(Location: ${response.headers['location']})`;
+          message = `(Location: ${incomingMessage.headers['location']})`;
         } else {
-          message = `\n(Headers: ${JSON.stringify(response.headers)}\nBody:` +
-           `${responseBody})`;
+          let encoding;
+          try {
+            encoding = (
+              incomingMessage.headers['content-type'].split('=')[
+              1].trim().toLowerCase() === 'iso-8859-1'? 'latin1': 'utf8'
+            );
+          } catch (exception) {
+            encoding = 'utf8';
+          }
+          const incomingMessageBody = await streamToString(
+            incomingMessage, encoding
+          );
+
+          message = `(\nHeaders: ${JSON.stringify(incomingMessage.headers)}` +
+            `\nBody: ${incomingMessageBody})`;
         }
-        resolve(`Responded with ${response.statusCode} ` +
-          `${response.statusMessage}. ${message}`);
+        // http.ClientRequest: "...the data from the response object must be
+        // consumed..."
+        incomingMessage.resume();
+        resolve(`Responded with ${incomingMessage.statusCode} ` +
+          `${incomingMessage.statusMessage}. ${message}`);
       };
-    }).on('aborted', (error) => {
-      resolve(error.toString());
-    }).on('error', (error) => {
-      resolve(error.toString());
-    });
-    request.setTimeout(REQUEST_TIMEOUT, function() {
+    }).setTimeout(IDLE_SOCKET_TIMEOUT, () => {
       request.abort();
-      resolve(`Request timed out.`);
+      resolve(`Socket has timed out from inactivity.`);
+    }).on('error', (error) => {
+      request.abort();
+      resolve(error.toString());
     });
   })
 );
@@ -129,7 +133,8 @@ const checkPolicyURL = async (program) => (
     }
 
     console.log(
-      `Checking policy URLs for ${programsList.length} programs...\n`);
+      `Checking policy URLs for ${programsList.length} programs...\n`
+    );
 
     Promise.allSettled(programsList.map(checkPolicyURL)).then((results) => {
       let invalidURLsCount = 0;
@@ -148,7 +153,7 @@ const checkPolicyURL = async (program) => (
       }
       if (invalidURLsCount) {
         core.setFailed(
-          `\n${invalidURLsCount} policy URL` +
+          `${invalidURLsCount} policy URL` +
           `${invalidURLsCount === 1? '': 's'} require attention.`
         );
       } else {
