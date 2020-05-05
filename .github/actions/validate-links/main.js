@@ -2,6 +2,8 @@ const core = require('@actions/core');
 const fsPromises = require('fs').promises;
 const http = require('http');
 const https = require('https');
+const stream = require('stream');
+const zlib = require('zlib');
 
 
 // TODO: MicroWeber false positive? PasteCoin?
@@ -9,18 +11,7 @@ const https = require('https');
 // with 302 message outside the html? The intention is clearly for a redirect
 // from .com to .org?
 // TODO: DigitalOcean redirecting to same URL?
-// TODO: Manually check results?
-// TODO: Try HEAD first, then if not available, GET?
 
-// TODO: Remove?
-/*
-const logResolved = function(programId) {
-  console.log(`Program ${programId} returned/resolved.`);
-};
-const logEnded = function(programId) {
-  console.log(`Program ${programId} IncomingMessage ended.`);
-};
-*/
 const IDLE_SOCKET_TIMEOUT = 5000;
 
 const streamToString = (stream, encoding) => {
@@ -31,6 +22,44 @@ const streamToString = (stream, encoding) => {
     stream.on('end', () => resolve(Buffer.concat(chunks).toString(encoding)));
   });
 };
+
+const decompressResponseBody = async (incomingMessage, encoding) => {
+  const onDecompressError = (error) => {
+    if (error) {
+      resolve(`An error occurred while decompressing response body: ${error}`);
+    }
+  };
+  const decompressedBodyDuplex = new stream.Duplex();
+
+  switch (incomingMessage.headers['content-encoding'].toLowerCase()) {
+    case 'br':
+      await stream.pipeline(
+        incomingMessageBody, zlib.createBrotliDecompress(),
+        decompressedBodyDuplex, onDecompressError
+      );
+      break;
+    case 'gzip':
+      await stream.pipeline(
+        incomingMessageBody, zlib.createGunzip(),
+        decompressedBodyDuplex, onDecompressError
+      );
+      break;
+    case 'deflate':
+      await stream.pipeline(
+        incomingMessageBody, zlib.createInflate(),
+        decompressedBodyDuplex, onDecompressError
+      );
+      break;
+    default:
+      await stream.pipeline(
+        incomingMessageBody, decompressedBodyDuplex,
+        onDecompressError
+      );
+  }
+
+  resolve(streamToString(decompressedBodyDuplex, encoding));
+};
+
 
 const checkPolicyURL = async (program) => (
   new Promise((resolve, reject) => {
@@ -91,10 +120,9 @@ const checkPolicyURL = async (program) => (
           } catch (exception) {
             encoding = 'utf8';
           }
-          const incomingMessageBody = await streamToString(
+          const incomingMessageBody = await decompressResponseBody(
             incomingMessage, encoding
           );
-
           message = `(\nHeaders: ${JSON.stringify(incomingMessage.headers)}` +
             `\nBody: ${incomingMessageBody})`;
         }
