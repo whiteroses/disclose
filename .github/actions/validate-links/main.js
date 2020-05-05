@@ -59,7 +59,7 @@ const decompressResponseBody = async (incomingMessage, encoding) => {
       );
   }
 
-  resolve(streamToString(decompressedBodyDuplex, encoding));
+  resolve(await streamToString(decompressedBodyDuplex, encoding));
 };
 
 
