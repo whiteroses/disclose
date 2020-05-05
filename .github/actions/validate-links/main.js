@@ -31,7 +31,9 @@ const decompressResponseBody = async (incomingMessage, encoding) => {
   };
   const decompressedBodyDuplex = new stream.Duplex();
 
-  switch (incomingMessage.headers['content-encoding'].toLowerCase()) {
+  switch (
+    incomingMessage.headers['content-encoding'].toLowerCase() || 'identity'
+  ) {
     case 'br':
       await stream.pipeline(
         incomingMessageBody, zlib.createBrotliDecompress(),
