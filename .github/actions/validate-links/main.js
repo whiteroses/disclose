@@ -25,7 +25,7 @@ const streamToString = (stream, encoding) => {
 };
 
 const decompressResponseBody = async (incomingMessage) => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const onDecompressError = (error) => {
       resolve(`An error occurred while decompressing response body: ${error}`);
     };
