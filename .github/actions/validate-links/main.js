@@ -15,6 +15,7 @@ const zlib = require('zlib');
 
 const IDLE_SOCKET_TIMEOUT = 5000;
 
+/*
 const streamToString = (stream, encoding) => {
   const chunks = [];
   return new Promise((resolve, reject) => {
@@ -23,13 +24,29 @@ const streamToString = (stream, encoding) => {
     stream.on('end', () => resolve(Buffer.concat(chunks).toString(encoding)));
   });
 };
+*/
 
 const decompressResponseBody = async (incomingMessage) => {
   return new Promise(async (resolve, reject) => {
     const onDecompressError = (error) => {
       resolve(`An error occurred while decompressing response body: ${error}`);
     };
+
+    let encoding;
+    try {
+      encoding = incomingMessage.headers['content-type'].split('=')[1].trim()
+        .toLowerCase() === 'iso-8859-1'? 'latin1': 'utf8';
+    } catch (exception) {
+      encoding = 'utf8';
+    }
+
     const decompressedBodyDuplex = new stream.Duplex();
+    const chunks = [];
+    decompressedBodyDuplex.on('data', (chunk) => chunks.push(chunk));
+    decompressedBodyDuplex.on('error', reject);
+    decompressedBodyDuplex.on(
+      'end', () => resolve(Buffer.concat(chunks).toString(encoding))
+    );
 
     const pipeline = util.promisify(stream.pipeline);
     const contentEncodingHeader = incomingMessage.headers['content-encoding'];
@@ -59,15 +76,7 @@ const decompressResponseBody = async (incomingMessage) => {
           incomingMessage, decompressedBodyDuplex, onDecompressError
         );
     }
-
-    let encoding;
-    try {
-      encoding = incomingMessage.headers['content-type'].split('=')[1].trim()
-        .toLowerCase() === 'iso-8859-1'? 'latin1': 'utf8';
-    } catch (exception) {
-      encoding = 'utf8';
-    }
-    resolve(await streamToString(decompressedBodyDuplex, encoding));
+    resolve(decompressedBodyDuplex);
   });
 };
 
