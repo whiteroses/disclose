@@ -40,29 +40,25 @@ const decompressResponseBody = async (incomingMessage) => {
     }
 
     const contentEncodingHeader = incomingMessage.headers['content-encoding'];
-    let body;
+    let responseBodyStream;
     switch (
       contentEncodingHeader? contentEncodingHeader.toLowerCase(): 'identity'
     ) {
       case 'br':
-        body = await streamToString(
-          incomingMessage.pipe(zlib.createBrotliDecompress()), encoding
+        responseBodyStream = incomingMessage.pipe(
+          zlib.createBrotliDecompress()
         );
         break;
       case 'gzip':
-        body = await streamToString(
-          incomingMessage.pipe(zlib.createGunzip()), encoding
-        );
+        responseBodyStream = incomingMessage.pipe(zlib.createGunzip());
         break;
       case 'deflate':
-        body = await streamToString(
-          incomingMessage.pipe(zlib.createInflate()), encoding
-        );
+        responseBodyStream = incomingMessage.pipe(zlib.createInflate());
         break;
       default:
-        body = await streamToString(incomingMessage, encoding);
+        responseBodyStream = incomingMessage;
     }
-    resolve(body);
+    resolve(await streamToString(responseBodyStream, encoding));
   });
 };
 
