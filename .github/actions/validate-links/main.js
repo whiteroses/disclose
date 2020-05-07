@@ -2,8 +2,6 @@ const core = require('@actions/core');
 const fsPromises = require('fs').promises;
 const http = require('http');
 const https = require('https');
-const stream = require('stream');
-const util = require('util');
 const zlib = require('zlib');
 
 
@@ -15,22 +13,23 @@ const zlib = require('zlib');
 
 const IDLE_SOCKET_TIMEOUT = 5000;
 
-/*
+
 const streamToString = (stream, encoding) => {
-  const chunks = [];
   return new Promise((resolve, reject) => {
+    const chunks = [];
     stream.on('data', (chunk) => chunks.push(chunk));
     stream.on('error', reject);
     stream.on('end', () => resolve(Buffer.concat(chunks).toString(encoding)));
   });
 };
-*/
+
 
 const decompressResponseBody = async (incomingMessage) => {
   return new Promise(async (resolve, reject) => {
-    const onDecompressError = (error) => {
-      resolve(`An error occurred while decompressing response body: ${error}`);
-    };
+    // TODO:
+    // const onDecompressError = (error) => {
+    //   resolve(`Error decompressing response body: ${error}`);
+    // };
 
     let encoding;
     try {
@@ -40,43 +39,30 @@ const decompressResponseBody = async (incomingMessage) => {
       encoding = 'utf8';
     }
 
-    const decompressedBodyDuplex = new stream.Duplex();
-    const chunks = [];
-    decompressedBodyDuplex.on('data', (chunk) => chunks.push(chunk));
-    decompressedBodyDuplex.on('error', reject);
-    decompressedBodyDuplex.on(
-      'end', () => resolve(Buffer.concat(chunks).toString(encoding))
-    );
-
-    const pipeline = util.promisify(stream.pipeline);
     const contentEncodingHeader = incomingMessage.headers['content-encoding'];
+    let body;
     switch (
       contentEncodingHeader? contentEncodingHeader.toLowerCase(): 'identity'
     ) {
       case 'br':
-        await pipeline(
-          incomingMessage, zlib.createBrotliDecompress(), decompressedBodyDuplex,
-          onDecompressError
+        body = await streamToString(
+          incomingMessage.pipe(zlib.createBrotliDecompress()), encoding
         );
         break;
       case 'gzip':
-        await pipeline(
-          incomingMessage, zlib.createGunzip(), decompressedBodyDuplex,
-          onDecompressError
+        body = await streamToString(
+          incomingMessage.pipe(zlib.createGunzip()), encoding
         );
         break;
       case 'deflate':
-        await pipeline(
-          incomingMessage, zlib.createInflate(), decompressedBodyDuplex,
-          onDecompressError
+        body = await streamToString(
+          incomingMessage.pipe(zlib.createInflate()), encoding
         );
         break;
       default:
-        await pipeline(
-          incomingMessage, decompressedBodyDuplex, onDecompressError
-        );
+        body = await streamToString(incomingMessage, encoding);
     }
-    resolve(decompressedBodyDuplex);
+    resolve(body);
   });
 };
 
