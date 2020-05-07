@@ -101,10 +101,10 @@ const checkPolicyURL = async (program) => (
       'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 ' +
         '(KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36',
     }}, async (incomingMessage) => {
-      incomingMessage.on('aborted', (error) => {
+      incomingMessage.on('aborted', () => {
         // "...if the response closes prematurely, the response object does not
         // emit an 'error' event but instead emits the 'aborted' event."
-        resolve(error.toString());
+        resolve('The response closed prematurely.');
       });
 
       const statusCode = incomingMessage.statusCode;
