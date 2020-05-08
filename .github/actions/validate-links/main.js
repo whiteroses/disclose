@@ -5,13 +5,10 @@ const https = require('https');
 const zlib = require('zlib');
 
 
-// TODO: MicroWeber false positive? PasteCoin?
-// This is strange: the page seems to 404, but meta refresh to or from a page
-// with 302 message outside the html? The intention is clearly for a redirect
-// from .com to .org?
-// TODO: DigitalOcean redirecting to same URL?
+// TODO: Can we use util.promisify?
 
-const IDLE_SOCKET_TIMEOUT = 5000;
+const SOCKET_IDLE_TIMEOUT = 5000;
+const REQUEST_TIMEOUT = 5000;
 
 
 const streamToString = (stream, encoding) => {
@@ -26,11 +23,6 @@ const streamToString = (stream, encoding) => {
 
 const decompressResponseBody = async (incomingMessage) => {
   return new Promise(async (resolve, reject) => {
-    // TODO:
-    // const onDecompressError = (error) => {
-    //   resolve(`Error decompressing response body: ${error}`);
-    // };
-
     let encoding;
     try {
       encoding = incomingMessage.headers['content-type'].split('=')[1].trim()
@@ -58,7 +50,16 @@ const decompressResponseBody = async (incomingMessage) => {
       default:
         responseBodyStream = incomingMessage;
     }
-    resolve(await streamToString(responseBodyStream, encoding));
+    responseBodyStream.on('error', (error) => {
+      resolve(`Error decompressing response body: ${error.toString()}`);
+    });
+    resolve(
+      await streamToString(responseBodyStream, encoding).catch(
+        (error) => {
+          resolve(error.toString());
+        }
+      )
+    );
   });
 };
 
@@ -81,6 +82,7 @@ const checkPolicyURL = async (program) => (
       resolve('URL protocol not HTTPS or HTTP.');
     }
 
+    let requestTimeout;
     const request = protocol.get(url, {'headers': {
       'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,' +
         'image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;' +
@@ -97,6 +99,7 @@ const checkPolicyURL = async (program) => (
       'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 ' +
         '(KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36',
     }}, async (incomingMessage) => {
+      clearTimeout(requestTimeout);
       incomingMessage.on('aborted', () => {
         // "...if the response closes prematurely, the response object does not
         // emit an 'error' event but instead emits the 'aborted' event."
@@ -115,9 +118,11 @@ const checkPolicyURL = async (program) => (
         } else {
           const incomingMessageBody = await decompressResponseBody(
             incomingMessage
-          );
-          message = `(\nHeaders: ${JSON.stringify(incomingMessage.headers)}` +
-            `\nBody: ${incomingMessageBody})`;
+          ).catch((error) => {
+            resolve(error);
+          });
+          message = `\nHeaders: ${JSON.stringify(incomingMessage.headers)}` +
+            `\nBody: ${incomingMessageBody}`;
         }
         // http.ClientRequest: "...the data from the response object must be
         // consumed..."
@@ -125,13 +130,20 @@ const checkPolicyURL = async (program) => (
         resolve(`Responded with ${incomingMessage.statusCode} ` +
           `${incomingMessage.statusMessage}. ${message}`);
       };
-    }).setTimeout(IDLE_SOCKET_TIMEOUT, () => {
-      request.abort();
-      resolve(`Socket has timed out from inactivity.`);
+    }).setTimeout(SOCKET_IDLE_TIMEOUT, () => {
+      request.destroy();
+      resolve(
+        `Socket has timed out from ${IDLE_SOCKET_TIMEOUT / 1000} seconds of` +
+        'inactivity.'
+      );
     }).on('error', (error) => {
-      request.abort();
+      request.destroy();
       resolve(error.toString());
     });
+    requestTimeout = setTimeout(() => {
+      request.destroy();
+      resolve(`Request timed out after ${REQUEST_TIMEOUT / 1000} seconds.`);
+    }, REQUEST_TIMEOUT);
   })
 );
 
@@ -184,6 +196,7 @@ const checkPolicyURL = async (program) => (
     });
   })();
 
+  // Wait for promise to complete
   const timeout = setInterval(() => {
     if (done) {
       clearInterval(timeout);
