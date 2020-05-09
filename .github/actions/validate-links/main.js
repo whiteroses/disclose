@@ -7,7 +7,6 @@ const zlib = require('zlib');
 
 // TODO: Can we use util.promisify?
 
-const SOCKET_IDLE_TIMEOUT = 5000;
 const REQUEST_TIMEOUT = 5000;
 
 
@@ -82,6 +81,7 @@ const checkPolicyURL = async (program) => (
       resolve('URL protocol not HTTPS or HTTP.');
     }
 
+    let requestTimeout;
     const request = protocol.get(url, {'headers': {
       'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,' +
         'image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;' +
@@ -129,20 +129,16 @@ const checkPolicyURL = async (program) => (
         resolve(`Responded with ${incomingMessage.statusCode} ` +
           `${incomingMessage.statusMessage}. ${message}`);
       };
-    }).setTimeout(SOCKET_IDLE_TIMEOUT, () => {
-      request.destroy();
-      resolve(
-        `Socket has timed out from ${SOCKET_IDLE_TIMEOUT / 1000} seconds of` +
-        'inactivity.'
-      );
     }).on('error', (error) => {
       request.destroy();
       resolve(error.toString());
     });
-    const requestTimeout = setTimeout(() => {
-      request.destroy();
-      resolve(`Request timed out after ${REQUEST_TIMEOUT / 1000} seconds.`);
-    }, REQUEST_TIMEOUT);
+    request.on('socket', (socket) => {
+      requestTimeout = setTimeout(() => {
+        request.destroy();
+        resolve(`Request timed out after ${REQUEST_TIMEOUT / 1000} seconds.`);
+      }, REQUEST_TIMEOUT);
+    });
   })
 );
 
