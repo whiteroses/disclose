@@ -132,8 +132,8 @@ const checkPolicyURL = async (program) => (
     }).setTimeout(SOCKET_IDLE_TIMEOUT, () => {
       request.destroy();
       resolve(
-        `Socket timed out after more than ${SOCKET_IDLE_TIMEOUT / 1000} of` +
-        'inactivity.'
+        `Socket timed out after more than ${SOCKET_IDLE_TIMEOUT / 1000} ` +
+        'seconds of inactivity.'
       );
     }).on('error', (error) => {
       request.destroy();
