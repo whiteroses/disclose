@@ -6,7 +6,6 @@ const zlib = require('zlib');
 
 
 // TODO: Can we use util.promisify?
-const BEFORE_SOCKET_CONNECTED_TIMEOUT = 5000;
 
 
 const streamToString = (stream, encoding) => {
@@ -97,7 +96,6 @@ const checkPolicyURL = async (program) => (
         'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 ' +
           '(KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36',
       },
-      'timeout': BEFORE_SOCKET_CONNECTED_TIMEOUT,
     }, async (incomingMessage) => {
       incomingMessage.on('aborted', () => {
         // "...if the response closes prematurely, the response object does not
