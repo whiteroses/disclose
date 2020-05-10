@@ -8,6 +8,8 @@ const zlib = require('zlib');
 // TODO: Can we use util.promisify?
 
 
+const SOCKET_IDLE_TIMEOUT = 5000;
+
 const streamToString = (stream, encoding) => {
   return new Promise((resolve, reject) => {
     const chunks = [];
@@ -127,11 +129,11 @@ const checkPolicyURL = async (program) => (
         resolve(`Responded with ${incomingMessage.statusCode} ` +
           `${incomingMessage.statusMessage}. ${message}`);
       };
-    }).on('timeout', () => {
+    }).setTimeout(SOCKET_IDLE_TIMEOUT, () => {
       request.destroy();
       resolve(
-        'Socket did not connect within timeout of ' +
-        `${BEFORE_SOCKET_CONNECTED_TIMEOUT / 1000} seconds.`
+        `Socket timed out after more than ${SOCKET_IDLE_TIMEOUT / 1000} of` +
+        'inactivity.'
       );
     }).on('error', (error) => {
       request.destroy();
