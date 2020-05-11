@@ -96,7 +96,7 @@ const checkPolicyURL = (program) => new Promise(
       //  'throwHttpErrors': false, // TODO: non-2xx status codes are resolved instead?
       //  'timeout': TIMEOUT,
       //});
-      incomingMessage = await got('https://example.com');
+      incomingMessage = await got('https://www.canva.com/security/bug-bounty/');
     } catch (error) {
       resolve(error.toString());
     }
