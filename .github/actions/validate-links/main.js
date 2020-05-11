@@ -74,6 +74,7 @@ const checkPolicyURL = (program) => new Promise(
 
     let incomingMessage;
     try {
+      console.log(url);
       incomingMessage = await got(url, {
         //'headers': {
         //  'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,' +
