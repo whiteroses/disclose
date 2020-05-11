@@ -75,7 +75,7 @@ const checkPolicyURL = (program) => new Promise(
     let incomingMessage;
     try {
       //incomingMessage = await got(url, {
-      incomingMessage = await got('https://example.com', {
+      incomingMessage = await got(program.policy_url, {
         //'headers': {
         //  'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,' +
         //    'image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;' +
